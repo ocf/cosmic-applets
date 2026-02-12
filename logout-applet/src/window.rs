@@ -52,7 +52,7 @@ impl cosmic::Application for Window {
 
     fn view(&self) -> Element<'_, Message> {
         let content = text("Log Out")
-            .size(30)
+            .size(18)
             .width(cosmic::iced::Length::Shrink);
 
         let button = button::custom(content)
