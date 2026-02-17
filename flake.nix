@@ -17,7 +17,12 @@
       ref = "main";
     };
 
-    crane.follows = "ocf-nix/wayout/crane";
+    crane = {
+      type = "github";
+      owner = "ipetkov";
+      repo = "crane";
+      ref = "master";
+    };
   };
 
   outputs = { self, ocf-nix, nixpkgs, flake-utils, crane }:
