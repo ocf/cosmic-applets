@@ -1,7 +1,9 @@
 use cosmic::app::Core;
 use cosmic::{Action, Element, Task};
 
-use cosmic::widget::{text, button};
+use cosmic::iced::{Alignment, Length};
+use cosmic::iced::widget::{row, vertical_space};
+use cosmic::widget::{autosize, container, button};
 use std::time::Duration;
 
 const ID: &str = "io.ocf.paper-genmon-applet";
@@ -76,14 +78,21 @@ impl cosmic::Application for Window {
     }
 
     fn view(&self) -> Element<'_, Message> {
-        let content = text(&self.panel_text)
-            .size(18)
-            .width(cosmic::iced::Length::Shrink);
+        let content = Element::from(
+            row!(
+                self.core.applet.text(&self.panel_text),
+                container(vertical_space().height(Length::Fixed(
+                    (self.core.applet.suggested_size(true).1
+                        + 2 * self.core.applet.suggested_padding(true).1)
+                        as f32
+                )))
+            ).align_y(Alignment::Center),
+        );
 
         let button = button::custom(content)
-            .class(cosmic::theme::Button::AppletIcon)
-            .padding([0, 12]);
+            .padding([0, self.core.applet.suggested_padding(true).0])
+            .class(cosmic::theme::Button::AppletIcon);
 
-        cosmic::widget::autosize::autosize(button, cosmic::widget::Id::unique()).into()
+        autosize::autosize(button, cosmic::widget::Id::unique()).into()
     }
 }
