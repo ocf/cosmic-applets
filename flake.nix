@@ -51,10 +51,15 @@
         packages = {
           paper = buildApplet "ocf-paper-quota-applet" "./paper-quota-applet";
           status = buildApplet "ocf-logout-applet" "./logout-applet";
+          theme = buildApplet "ocf-theme-applet" "./theme-applet";
           
           default = pkgs.symlinkJoin {
             name = "all";
-            paths = [ self.packages.${system}.paper self.packages.${system}.status ];
+            paths = [
+              self.packages.${system}.paper
+              self.packages.${system}.status
+              self.packages.${system}.theme
+            ];
           };
         };
 
