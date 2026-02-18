@@ -39,9 +39,15 @@ impl cosmic::Application for Window {
             .map(|x| String::from_utf8_lossy(&x.stdout).trim().to_string())
             .unwrap_or("unknown".to_string());
 
+        let hostname = std::process::Command::new("hostname")
+            .output()
+            .ok()
+            .map(|x| String::from_utf8_lossy(&x.stdout).trim().to_string())
+            .unwrap_or("unknown".to_string());
+
         let window = Window {
             core,
-            panel_text: format!("Log out as {}", username),
+            panel_text: format!("Log Out ({}@{})", username, hostname),
             ..Default::default()
         };
 
