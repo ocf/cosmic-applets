@@ -18,7 +18,7 @@ pub enum Message {
     ToggleTheme,
 }
 
-fn get_config_path() -> Option<PathBuf> {
+fn get_cosmic_config_path() -> Option<PathBuf> {
     std::env::var_os("HOME").map(|home| {
         let mut path = PathBuf::from(home);
         path.push(".config/cosmic/com.system76.CosmicTheme.Mode/v1/is_dark");
@@ -26,13 +26,26 @@ fn get_config_path() -> Option<PathBuf> {
     })
 }
 
+fn get_remote_config_path() -> Option<PathBuf> {
+    std::env::var_os("HOME").map(|home| {
+        let mut path = PathBuf::from(home);
+        path.push("remote/.config/ocf/theme");
+        path
+    })
+}
+
 fn read_is_dark() -> bool {
-    if let Some(path) = get_config_path() {
+    if let Some(path) = get_remote_config_path() {
         if let Ok(content) = fs::read_to_string(path) {
-            return content.trim() == "true";
+            return content.trim() == "dark"; // returns light or dark based on user's config
         }
     }
-    return false;
+    if let Some(path) = get_cosmic_config_path() {
+        if let Ok(content) = fs::read_to_string(path) {
+            return content.trim() == "true"; // based on cosmic config (ocf default)
+        }
+    }
+    return true;
 }
 
 fn set_theme(is_dark: bool) {
@@ -48,11 +61,21 @@ fn set_theme(is_dark: bool) {
         .output();
 
     // Write to cosmic config
-    if let Some(path) = get_config_path() {
+    if let Some(path) = get_cosmic_config_path
+        () {
         if let Some(parent) = path.parent() {
             let _ = fs::create_dir_all(parent);
         }
         let _ = fs::write(path, if is_dark { "true" } else { "false" });
+    }
+
+    // Write to user config
+    if let Some(path) = get_remote_config_path
+        () {
+        if let Some(parent) = path.parent() {
+            let _ = fs::create_dir_all(parent);
+        }
+        let _ = fs::write(path, if is_dark { "dark" } else { "light" });
     }
 }
 
@@ -73,6 +96,7 @@ impl cosmic::Application for Window {
     fn init(core: Core, _flags: Self::Flags) -> (Self, Task<Action<Self::Message>>) {
         let is_dark = read_is_dark();
         let window = Window { core, is_dark };
+        set_theme(is_dark);
 
         (window, Task::none())
     }
