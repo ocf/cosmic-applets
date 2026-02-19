@@ -20,7 +20,8 @@
             src = ./.;
             filter = path: type:
               (craneLib.filterCargoSources path type) ||
-              (builtins.match ".*\.desktop$" path != null);
+              (builtins.match ".*\.desktop$" path != null) ||
+              (builtins.match ".*\.svg$" path != null);
           }; 
           strictDeps = true;
           nativeBuildInputs = with pkgs; [ pkg-config copyDesktopItems ];

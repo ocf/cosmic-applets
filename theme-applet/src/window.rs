@@ -1,12 +1,10 @@
 use cosmic::app::Core;
 use cosmic::{Action, Element, Task};
 
-use cosmic::iced::{Alignment, Length};
-use cosmic::iced::widget::{row, vertical_space};
-use cosmic::widget::{autosize, container, button};
-use std::process::Command;
+use cosmic::widget::autosize;
 use std::fs;
 use std::path::PathBuf;
+use std::process::Command;
 
 const ID: &str = "io.ocf.theme-applet";
 
@@ -34,11 +32,15 @@ fn read_is_dark() -> bool {
             return content.trim() == "true";
         }
     }
-    return false
+    return false;
 }
 
 fn set_theme(is_dark: bool) {
-    let scheme = if is_dark { "prefer-dark" } else { "prefer-light" };
+    let scheme = if is_dark {
+        "prefer-dark"
+    } else {
+        "prefer-light"
+    };
 
     // Set gsettings
     let _ = Command::new("gsettings")
@@ -70,10 +72,7 @@ impl cosmic::Application for Window {
 
     fn init(core: Core, _flags: Self::Flags) -> (Self, Task<Action<Self::Message>>) {
         let is_dark = read_is_dark();
-        let window = Window {
-            core,
-            is_dark,
-        };
+        let window = Window { core, is_dark };
 
         (window, Task::none())
     }
@@ -89,20 +88,17 @@ impl cosmic::Application for Window {
     }
 
     fn view(&self) -> Element<'_, Message> {
-        let label = if self.is_dark { "Dark Mode" } else { "Light Mode" };
-        
-        let content = Element::from(
-            row!(
-                self.core.applet.text(label),
-                container(vertical_space().height(Length::Fixed(
-                    (self.core.applet.suggested_size(true).1
-                        + 2 * self.core.applet.suggested_padding(true).1)
-                        as f32
-                )))
-            ).align_y(Alignment::Center),
-        );
+        let sun_icon =
+            cosmic::widget::icon::from_svg_bytes(include_bytes!("./assets/light_mode.svg"));
+        let moon_icon =
+            cosmic::widget::icon::from_svg_bytes(include_bytes!("./assets/dark_mode.svg"));
 
-        let button = button::custom(content)
+        let selected_icon = if self.is_dark { sun_icon } else { moon_icon };
+
+        let button = self
+            .core
+            .applet
+            .icon_button_from_handle(selected_icon)
             .on_press(Message::ToggleTheme)
             .padding([0, self.core.applet.suggested_padding(true).0])
             .class(cosmic::theme::Button::AppletIcon);
