@@ -3488,13 +3488,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ocf-theme-applet"
-version = "0.1.0"
-dependencies = [
- "libcosmic",
-]
-
-[[package]]
 name = "once_cell"
 version = "1.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -2,7 +2,6 @@
 members = [
     "paper-quota-applet",
     "logout-applet",
-    "theme-applet",
 ]
 resolver = "2"
 
