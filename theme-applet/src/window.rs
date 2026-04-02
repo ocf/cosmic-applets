@@ -4,7 +4,6 @@ use cosmic::{Action, Element, Task};
 use cosmic::widget::autosize;
 use std::fs;
 use std::path::PathBuf;
-use std::process::Command;
 
 const ID: &str = "io.ocf.theme-applet";
 
@@ -26,40 +25,16 @@ fn get_cosmic_config_path() -> Option<PathBuf> {
     })
 }
 
-fn get_remote_config_path() -> Option<PathBuf> {
-    std::env::var_os("HOME").map(|home| {
-        let mut path = PathBuf::from(home);
-        path.push("remote/.config/ocf/theme");
-        path
-    })
-}
-
 fn read_is_dark() -> bool {
-    if let Some(path) = get_remote_config_path() {
-        if let Ok(content) = fs::read_to_string(path) {
-            return content.trim() == "dark"; // returns light or dark based on user's config
-        }
-    }
     if let Some(path) = get_cosmic_config_path() {
         if let Ok(content) = fs::read_to_string(path) {
-            return content.trim() == "true"; // based on cosmic config (ocf default)
+            return content.trim() == "true";
         }
     }
     return true;
 }
 
 fn set_theme(is_dark: bool) {
-    let scheme = if is_dark {
-        "prefer-dark"
-    } else {
-        "prefer-light"
-    };
-
-    // Set gsettings
-    let _ = Command::new("gsettings")
-        .args(["set", "org.gnome.desktop.interface", "color-scheme", scheme])
-        .output();
-
     // Write to cosmic config
     if let Some(path) = get_cosmic_config_path
         () {
@@ -67,15 +42,6 @@ fn set_theme(is_dark: bool) {
             let _ = fs::create_dir_all(parent);
         }
         let _ = fs::write(path, if is_dark { "true" } else { "false" });
-    }
-
-    // Write to user config
-    if let Some(path) = get_remote_config_path
-        () {
-        if let Some(parent) = path.parent() {
-            let _ = fs::create_dir_all(parent);
-        }
-        let _ = fs::write(path, if is_dark { "dark" } else { "light" });
     }
 }
 
@@ -96,7 +62,6 @@ impl cosmic::Application for Window {
     fn init(core: Core, _flags: Self::Flags) -> (Self, Task<Action<Self::Message>>) {
         let is_dark = read_is_dark();
         let window = Window { core, is_dark };
-        set_theme(is_dark);
 
         (window, Task::none())
     }
